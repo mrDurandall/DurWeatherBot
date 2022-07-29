@@ -62,28 +62,35 @@ async def send_weather(message: types.Message):
         send_time = message.text.lower().split()[2]
         chat_id = message['chat']['id']
 
-        logger.info(f'{user} запросил рассылку погоды погоды в {city} в {send_time}')
+        if not re.fullmatch('([01][0-9]|2[0-4]):([0-5][0-9])', send_time):
 
-        with open('daily_send.json', encoding='utf-8') as file:
-            daily_send_list = json.load(file)
+            logger.error(f'{user} запросил рассылку погоды на некорректное время')
+            await message.answer('Вы указали неверное время для рассылки!')
 
-        new_send_contact = {
-                'chat_id': chat_id,
-                'send_time': send_time,
-                'city': city,
-            }
-
-        if new_send_contact not in daily_send_list:
-            daily_send_list.append(new_send_contact)
-            with open('daily_send.json', 'w', encoding='utf-8') as file:
-                json.dump(daily_send_list, file, ensure_ascii=False, indent=4)
-
-            aioschedule.every().day.at(send_time).do(daily_send, chat_id, city)
-            logger.info(f'Рассылка для пользователя {user} в {city} в {send_time} создана')
-            await message.answer('Рассылка добавлена!')
         else:
-            logger.error(f'Рассылка для пользователя {user} в {city} в {send_time} уже существует')
-            await message.answer('Данная рассылка для Вас уже существует!')
+
+            logger.info(f'{user} запросил рассылку погоды погоды в {city} в {send_time}')
+
+            with open('daily_send.json', encoding='utf-8') as file:
+                daily_send_list = json.load(file)
+
+            new_send_contact = {
+                    'chat_id': chat_id,
+                    'send_time': send_time,
+                    'city': city,
+                }
+
+            if new_send_contact not in daily_send_list:
+                daily_send_list.append(new_send_contact)
+                with open('daily_send.json', 'w', encoding='utf-8') as file:
+                    json.dump(daily_send_list, file, ensure_ascii=False, indent=4)
+
+                aioschedule.every().day.at(send_time).do(daily_send, chat_id, city)
+                logger.info(f'Рассылка для пользователя {user} в {city} в {send_time} создана')
+                await message.answer('Рассылка добавлена!')
+            else:
+                logger.error(f'Рассылка для пользователя {user} в {city} в {send_time} уже существует')
+                await message.answer('Данная рассылка для Вас уже существует!')
 
     else:
         logger.info(f'{user} запросил текущую погоду в {message.text.strip()}')
