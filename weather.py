@@ -1,18 +1,6 @@
 import requests
-import json
 import datetime
 
-
-WIND_DIRECTIONS = {
-    chr(8592): 'Восточный',
-    chr(8593): 'Южный',
-    chr(8594): 'Западный',
-    chr(8595): 'Северный',
-    chr(8598): 'Юго-Восточный',
-    chr(8599): 'Юго-Западный',
-    chr(8600): 'Северо-Западный',
-    chr(8601): 'Северо-Восточный',
-}
 
 WWO_CODE = {
     "113": "Sunny",
@@ -94,12 +82,16 @@ def current_weather(city):
         'Accept-Language': 'ru'
     }
 
-    url = f'https://wttr.in/{city}?format=j2'
+    params = {
+        'format': 'j2',
+    }
 
-    weather_json = requests.get(url, headers=headers)
-    if weather_json.status_code == 404:
+    url = f'https://wttr.in/{city}'
+
+    weather_res = requests.get(url, headers=headers, params=params)
+    if weather_res.status_code == 404:
         return 'Что-то пошло не так!'
-    weather = json.loads(weather_json.text)
+    weather = weather_res.json()
     current_conditions = weather['current_condition'][0]
 
     weather_symbol = WEATHER_SYMBOL[WWO_CODE[current_conditions['weatherCode']]]
@@ -122,12 +114,16 @@ def weather_forecast(city):
         'Accept-Language': 'ru'
     }
 
-    url = f'https://wttr.in/{city}?format=j1'
+    params = {
+        'format': 'j1',
+    }
 
-    weather_json = requests.get(url, headers=headers)
-    if weather_json.status_code == 404:
+    url = f'https://wttr.in/{city}'
+
+    weather_res = requests.get(url, headers=headers, params=params)
+    if weather_res.status_code == 404:
         return 'Что-то пошло не так!'
-    weather = json.loads(weather_json.text)
+    weather = weather_res.json()
     forecast = weather['weather']
     forecast_by_hours = {}
 
@@ -169,8 +165,5 @@ def weather_forecast(city):
 
 if __name__ == '__main__':
 
-    # print(current_weather('Северодвинск'))
-    print(weather_forecast('Северодвинск'))
-
-
-
+    print(current_weather('Северодвинск'))
+    # print(weather_forecast('Северодвинск'))
