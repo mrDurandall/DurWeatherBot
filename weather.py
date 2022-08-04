@@ -89,7 +89,7 @@ def current_weather(city):
     url = f'https://wttr.in/{city}'
 
     weather_res = requests.get(url, headers=headers, params=params)
-    if weather_res.status_code == 404:
+    if weather_res.status_code != 200:
         return 'Что-то пошло не так!'
     weather = weather_res.json()
     current_conditions = weather['current_condition'][0]
@@ -121,7 +121,7 @@ def weather_forecast(city):
     url = f'https://wttr.in/{city}'
 
     weather_res = requests.get(url, headers=headers, params=params)
-    if weather_res.status_code == 404:
+    if weather_res.status_code != 200:
         return 'Что-то пошло не так!'
     weather = weather_res.json()
     forecast = weather['weather']
